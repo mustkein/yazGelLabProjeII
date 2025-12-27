@@ -1,0 +1,21 @@
+ID,Name,Active,Social,Connection,Neighbors,X,Y
+1,Süleymaniye Camii,0.8,400,3,2;4;5,100,250
+2,Sultanahmet Meydanı,0.9,600,4,1;3;11;18,150,350
+3,Kapalı Çarşı,0.95,350,5,2;6;9;17;20,120,200
+4,Galata Kulesi,0.95,950,3,1;5;7,400,150
+5,İstiklal Caddesi,1.0,800,5,1;4;6;11;14,450,100
+6,Dolmabahçe Sarayı,0.7,700,2,5;7,600,300
+7,Ortaköy Sahili,0.8,900,4,4;9;13;19,700,150
+8,Kız Kulesi,0.82,600,2,7;16,1000,350
+9,Mısır Çarşısı,0.8,700,4,5;16,220,180
+10,Yerebatan Sarnıcı,0.85,750,3,7;12;18,250,350
+11,Topkapı Sarayı,0.9,850,4,2;9;13;15,250,450
+12,Pierre Loti Tepesi,0.78,550,2,13;20,100,80
+13,Eyüp Sultan Camii,0.88,880,2,12;14,150,100
+14,Gülhane Parkı,0.8,500,3,1;2;10,450,500
+15,Rumeli Hisarı,0.7,450,2,10;17,900,50
+16,Beylerbeyi Sarayi,0.7,380,2,8;15,900,400
+17,Çırağan Sarayı,0.75,400,2,15;16,650,400
+18,Yıldız Sarayı,0.65,350,2,14;19,550,140
+19,Anadolu Hisarı,0.6,250,2,8;17,950,80
+20,Arkeoloji Müzesi,0.72,420,3,9;11;16,350,500
