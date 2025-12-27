@@ -1,0 +1,93 @@
+{
+    "nodes": [
+        {
+            "id": 1,
+            "name": "S\u00fcleymaniye Camii",
+            "x": 100,
+            "y": 300,
+            "active_score": 0.8,
+            "social_score": 400,
+            "connection_count": 3
+        },
+        {
+            "id": 2,
+            "name": "Sultanahmet Meydan\u0131",
+            "x": 120,
+            "y": 320,
+            "active_score": 0.9,
+            "social_score": 600,
+            "connection_count": 4
+        },
+        {
+            "id": 3,
+            "name": "Kapal\u0131 \u00c7ar\u015f\u0131",
+            "x": 110,
+            "y": 280,
+            "active_score": 0.95,
+            "social_score": 350,
+            "connection_count": 5
+        },
+        {
+            "id": 4,
+            "name": "Galata Kulesi",
+            "x": 300,
+            "y": 200,
+            "active_score": 0.95,
+            "social_score": 950,
+            "connection_count": 3
+        },
+        {
+            "id": 5,
+            "name": "\u0130stiklal Caddesi",
+            "x": 320,
+            "y": 180,
+            "active_score": 1.0,
+            "social_score": 800,
+            "connection_count": 5
+        },
+        {
+            "id": 6,
+            "name": "Dolmabah\u00e7e Saray\u0131",
+            "x": 400,
+            "y": 150,
+            "active_score": 0.7,
+            "social_score": 700,
+            "connection_count": 2
+        },
+        {
+            "id": 7,
+            "name": "Ortak\u00f6y Sahili",
+            "x": 450,
+            "y": 120,
+            "active_score": 0.8,
+            "social_score": 900,
+            "connection_count": 2
+        }
+    ],
+    "edges": [
+        {
+            "source": 1,
+            "target": 2
+        },
+        {
+            "source": 1,
+            "target": 4
+        },
+        {
+            "source": 2,
+            "target": 3
+        },
+        {
+            "source": 4,
+            "target": 5
+        },
+        {
+            "source": 5,
+            "target": 6
+        },
+        {
+            "source": 6,
+            "target": 7
+        }
+    ]
+}
