@@ -241,5 +241,87 @@ graph TD
 
 ---
 
-4.Mimari ve İşleyiş Analizi
+# 4. MİMARİ VE İŞLEYİŞ ANALİZİ
+
+
+Aşağıda, sistemin modüler yapısı ve çalışma zamanı davranışları, proje dokümantasyonundaki görsel diyagramların (Sınıf ve Akış Şemaları) renk kodlarına atıfta bulunularak detaylandırılmıştır.
+
+---
+
+## 1. Yazılım Mimarisi ve Sınıf Yapısı
+
+Sistem dört ana modülden oluşmaktadır. Her modül belirli bir sorumluluk alanını üstlenir.
+
+### A. Kullanıcı Arayüzü Katmanı (UI Layer)
+> **Diyagram Referansı:** Sarı Alan (`#FFF2CC`)
+
+Kullanıcının sistemle etkileşime girdiği ön yüz katmanıdır.
+
+* **Sınıf:** `TuristRehberiUygulamasi`
+* **Görevi:**
+    * Uygulamanın grafiksel arayüzünü (`Tkinter`) yönetir.
+    * Kullanıcıdan başlangıç (`Start Node`) ve hedef (`Target Node`) verilerini alır.
+    * Harita çizimi (`Canvas`) ve sonuç listeleme (`Treeview`) işlemlerini yürütür.
+* **İlişkisi:** Veri katmanı (`Graph`) ile doğrudan iletişim halindedir ve analiz butonuna basıldığında ilgili algoritmayı tetikler.
+
+### B. Veri Yönetim Katmanı (Data & Manager Layer)
+> **Diyagram Referansı:** Turuncu Alan (`#F4B084`)
+
+Projenin veri omurgasını oluşturur. Verinin bellekte tutulması, dosyadan okunması ve yönetilmesinden sorumludur.
+
+* **Temel Sınıflar:**
+    * `Node` (Düğüm): Haritadaki mekanı, koordinatları (`x,y`) ve sosyal skorları (`active_score`) temsil eder.
+    * `Edge` (Kenar): İki mekan arasındaki bağlantıyı ve maliyeti (`weight`) temsil eder.
+* **Yönetici Sınıf:** `Graph`
+    * Tüm düğüm ve kenarları bir arada tutan ana kapsayıcıdır.
+    * CSV dosyasından veri yükleme (`load_from_csv`).
+    * JSON formatında kaydetme/yükleme.
+    * Dinamik ağırlık hesaplama (`_calculate_weight`).
+
+### C. Algoritma Katmanı (Logic Layer)
+> **Diyagram Referansı:** Mavi (Soyut) ve Yeşil (Somut) Alanlar
+
+Projenin hesaplama mantığının bulunduğu merkezdir. **Strateji Tasarım Deseni (Strategy Pattern)** kullanılarak tasarlanmıştır.
+
+* **Soyutlama (Mavi Alan):**
+    * `Algorithm`: Tüm algoritmaların türediği soyut (abstract) sınıftır. Her algoritmanın `execute(graph, start, target)` metoduna sahip olmasını zorunlu kılar.
+* **Somut Algoritmalar (Yeşil Alan):**
+    * **Yol Bulma:** `BFS`, `DFS` (Gezinme), `Dijkstra`, `A*` (En Kısa Yol), `FloydWarshall`.
+    * **Analiz:** `DegreeCentrality` (Popülerlik), `Coloring` (Graf Renklendirme), `ConnectedComponents` (Kopuk Parçalar).
+
+https://github.com/mustkein/yazGelLabProjeII/issues/3#issue-3771285499
+
+---
+
+## 2. Sistem İşleyişi ve Algoritma Akış Analizi
+
+Sistemenin çalışma zamanındaki davranışı üç ana fazdan oluşur.
+
+### Faz 1: Başlatma (Initialization)
+Program `main.py` üzerinden tetiklendiğinde sırasıyla şu işlemler gerçekleşir:
+1.  **Arayüz Yüklemesi:** `TuristRehberiUygulamasi` sınıfı başlatılır.
+2.  **Veri Entegrasyonu:** Sistem varsayılan olarak `mekanlar.csv` dosyasını okur. `Graph` sınıfı bu ham veriyi işleyerek bellekte nesnelere dönüştürür.
+3.  **Görselleştirme:** Oluşturulan graf yapısı arayüze çizilir ve sistem "Kullanıcı Bekleniyor" durumuna geçer.
+
+### Faz 2: Kullanıcı Etkileşimi
+Kullanıcı arayüz üzerinden aşağıdaki işlemleri gerçekleştirebilir:
+
+* **Algoritma Çalıştırma:**
+    * Kullanıcı algoritmayı seçer ve noktaları belirler.
+    * Sistem ilgili algoritma sınıfını dinamik olarak çağırır.
+* **Veri Düzenleme (CRUD):**
+    * Düğüm Ekleme/Silme ve Bağlantı kurma işlemleri `Graph` yöneticisi üzerinden yapılır ve harita anlık (`refresh`) güncellenir.
+* **Dosya İşlemleri (I/O):**
+    * Mevcut senaryo JSON olarak dışa aktarılabilir veya yeni bir dosya içeri aktarılabilir.
+
+### Faz 3: Sonuçlandırma
+Algoritma çalıştıktan sonra sonuçlar değerlendirilir:
+
+* **Başarılı Sonuç:** Yol bulunduysa haritada **kırmızı çizgi** ile rota çizilir, adım adım detaylar tabloya yazılır.
+* **Hata Durumu:** Hedefe ulaşılamıyorsa (graf kopuksa) veya geçersiz girdi varsa kullanıcıya görsel hata mesajı gösterilir.
+
+https://github.com/mustkein/yazGelLabProjeII/issues/2#issue-3771284551
+
+---
+
 
