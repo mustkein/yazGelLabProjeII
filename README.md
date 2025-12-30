@@ -240,3 +240,6 @@ graph TD
 - **Alan Karmaşıklığı:** O(V)
 
 ---
+
+4.Mimari ve İşleyiş Analizi
+
