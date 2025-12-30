@@ -289,7 +289,84 @@ Projenin hesaplama mantığının bulunduğu merkezdir. **Strateji Tasarım Dese
     * **Yol Bulma:** `BFS`, `DFS` (Gezinme), `Dijkstra`, `A*` (En Kısa Yol), `FloydWarshall`.
     * **Analiz:** `DegreeCentrality` (Popülerlik), `Coloring` (Graf Renklendirme), `ConnectedComponents` (Kopuk Parçalar).
 
-https://github.com/mustkein/yazGelLabProjeII/issues/3#issue-3771285499
+```mermaid
+---
+config:
+  theme: base
+  look: neo
+---
+classDiagram
+    class Node:::graphextends {
+        +int id
+        +str name
+        +int x
+        +int y
+        +float active_score
+        +int social_score
+        +int connection_count
+    }
+
+    class Edge:::graphextends {
+        +Node source
+        +Node target
+        +float weight
+    }
+    class Graph:::graphbase {
+        +dict nodes
+        +dict adjacency_list
+        +str data_dir
+        +add_node(Node node)
+        +add_edge(id1, id2)
+        +load_from_csv(filename)
+        +save_to_json_path(filepath)
+        +get_neighbors(node_id)
+        -_calculate_weight(n1, n2)
+        +export_adjacency_matrix()
+    }
+    class Algorithm:::algbase {
+        <<Abstract>>
+        +execute(graph, start, target)
+    }
+
+    class BFS:::extends { +execute() }
+    class DFS:::extends { +execute() }
+    class Dijkstra:::extends { +execute() }
+    class AStar:::extends { +execute() }
+    class FloydWarshall:::extends { +execute() }
+    class DegreeCentrality:::extends { +execute() }
+    class Coloring:::extends { +execute() }
+    class ConnectedComponents:::extends { +execute() }
+    class TuristRehberiUygulamasi {
+        +Tk root
+        +Graph graph
+        +create_ui_controls()
+        +create_result_table()
+        +load_scenario()
+        +run_algorithm()
+        +draw_map()
+    }
+    Graph "1" *-- "many" Node : Yönetir
+    Graph "1" *-- "many" Edge : Yönetir
+    Edge --> Node : Bağlar
+    
+    Algorithm <|-- BFS
+    Algorithm <|-- DFS
+    Algorithm <|-- Dijkstra
+    Algorithm <|-- AStar
+    Algorithm <|-- FloydWarshall
+    Algorithm <|-- DegreeCentrality
+    Algorithm <|-- Coloring
+    Algorithm <|-- ConnectedComponents
+
+    TuristRehberiUygulamasi --> Graph : Kullanır
+    TuristRehberiUygulamasi ..> Algorithm : Çalıştırır
+
+    %% Define styles for Algorithm base, Graph base, their children
+    classDef algbase fill:#add8e6,stroke:#1a237e,stroke-width:2px;
+    classDef extends fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px;
+    classDef graphbase fill:#ffd59a,stroke:#bf360c,stroke-width:2px;   
+    classDef graphextends fill:#ffeebb,stroke:#ab6600,stroke-width:2px;
+```
 
 ---
 
@@ -320,8 +397,59 @@ Algoritma çalıştıktan sonra sonuçlar değerlendirilir:
 * **Başarılı Sonuç:** Yol bulunduysa haritada **kırmızı çizgi** ile rota çizilir, adım adım detaylar tabloya yazılır.
 * **Hata Durumu:** Hedefe ulaşılamıyorsa (graf kopuksa) veya geçersiz girdi varsa kullanıcıya görsel hata mesajı gösterilir.
 
-https://github.com/mustkein/yazGelLabProjeII/issues/2#issue-3771284551
+```mermaid
+graph TD
+    %% --- GÖRSELDEN ALINAN RENK PALETİ ---
+    
+    %% UI (Sarı/Krem) - Arayüz ve Kullanıcı Etkileşimi
+    classDef uiStyle fill:#FFF2CC,stroke:#D6B656,stroke-width:2px,color:#000;
+    
+    %% DATA (Turuncu/Toprak) - Veri ve Graph Yönetimi
+    classDef dataStyle fill:#F4B084,stroke:#B95000,stroke-width:2px,color:#000;
+    
+    %% LOGIC (Mavi) - Karar Mekanizmaları ve Girdiler
+    classDef logicStyle fill:#DAE8FC,stroke:#6C8EBF,stroke-width:2px,color:#000;
+    
+    %% ALGO (Yeşil) - Algoritma İşleme
+    classDef algoStyle fill:#D5E8D4,stroke:#82B366,stroke-width:2px,color:#000;
 
+    %% ERROR (Açık Kırmızı) - Hata Durumları
+    classDef errorStyle fill:#F8CECC,stroke:#B85450,stroke-width:2px,color:#000;
+
+    %% ---------------------------------------------------
+
+    start([Başlat: main.py]):::uiStyle --> init_gui[Arayüzü Başlat: TuristRehberi]:::uiStyle
+    
+    init_gui --> load_csv[Varsayılan CSV'yi Yükle]:::dataStyle
+    load_csv --> create_graph[Graph Yapısını Oluştur]:::dataStyle
+    create_graph --> draw_ui[Haritayı ve Tabloyu Çiz]:::uiStyle
+    
+    draw_ui --> user_wait{Kullanıcı Bekleniyor}:::uiStyle
+    
+    %% --- DAL 1: ALGORİTMA İŞLEMLERİ (Yeşil & Mavi) ---
+    user_wait -- Algoritma Seç --> get_inputs[Başlangıç/Bitiş ID Gir]:::logicStyle
+    get_inputs --> run_algo[Algoritmayı Çalıştır]:::algoStyle
+    run_algo --> check_result{Sonuç Var mı?}:::logicStyle
+    
+    check_result -- Evet --> draw_path[Haritada Yolu Göster]:::uiStyle
+    draw_path --> update_table[Sonuç Tablosunu Doldur]:::uiStyle
+    
+    check_result -- Hayır --> show_error[Hata: Yol Bulunamadı]:::errorStyle
+    
+    %% --- DAL 2: VERİ YÖNETİMİ (Turuncu) ---
+    user_wait -- Node Ekle / Sil / Bağla --> crud_ops[Graph Manager Güncelle]:::dataStyle
+    crud_ops --> refresh_map[Haritayı Yeniden Çiz]:::uiStyle
+    
+    %% --- DAL 3: DOSYA İŞLEMLERİ (Turuncu) ---
+    user_wait -- JSON Kaydet / Yükle --> file_io[Dosya İşlemleri]:::dataStyle
+    file_io --> refresh_map
+
+    %% Döngüler
+    update_table --> user_wait
+    show_error --> user_wait
+    refresh_map --> user_wait
+```
 ---
+
 
 
