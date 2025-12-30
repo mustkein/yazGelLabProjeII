@@ -253,7 +253,6 @@ Aşağıda, sistemin modüler yapısı ve çalışma zamanı davranışları, pr
 Sistem dört ana modülden oluşmaktadır. Her modül belirli bir sorumluluk alanını üstlenir.
 
 ### A. Kullanıcı Arayüzü Katmanı (UI Layer)
-> **Diyagram Referansı:** Sarı Alan (`#FFF2CC`)
 
 Kullanıcının sistemle etkileşime girdiği ön yüz katmanıdır.
 
@@ -265,7 +264,6 @@ Kullanıcının sistemle etkileşime girdiği ön yüz katmanıdır.
 * **İlişkisi:** Veri katmanı (`Graph`) ile doğrudan iletişim halindedir ve analiz butonuna basıldığında ilgili algoritmayı tetikler.
 
 ### B. Veri Yönetim Katmanı (Data & Manager Layer)
-> **Diyagram Referansı:** Turuncu Alan (`#F4B084`)
 
 Projenin veri omurgasını oluşturur. Verinin bellekte tutulması, dosyadan okunması ve yönetilmesinden sorumludur.
 
@@ -279,7 +277,6 @@ Projenin veri omurgasını oluşturur. Verinin bellekte tutulması, dosyadan oku
     * Dinamik ağırlık hesaplama (`_calculate_weight`).
 
 ### C. Algoritma Katmanı (Logic Layer)
-> **Diyagram Referansı:** Mavi (Soyut) ve Yeşil (Somut) Alanlar
 
 Projenin hesaplama mantığının bulunduğu merkezdir. **Strateji Tasarım Deseni (Strategy Pattern)** kullanılarak tasarlanmıştır.
 
@@ -360,11 +357,12 @@ classDiagram
     TuristRehberiUygulamasi --> Graph : Kullanır
     TuristRehberiUygulamasi ..> Algorithm : Çalıştırır
 
-    %% --- Renk Tanımları ---
-    classDef algbase fill:#add8e6,stroke:#1a237e,stroke-width:2px;
-    classDef extends fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px;
-    classDef graphbase fill:#ffd59a,stroke:#bf360c,stroke-width:2px;    
-    classDef graphextends fill:#ffeebb,stroke:#ab6600,stroke-width:2px;
+    %% --- Renk Tanımları (DÜZELTİLDİ: color:#000 eklendi) ---
+    %% Her satırın sonuna color:#000 (Siyah Yazı) ekledim.
+    classDef algbase fill:#add8e6,stroke:#1a237e,stroke-width:2px,color:#000;
+    classDef extends fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px,color:#000;
+    classDef graphbase fill:#ffd59a,stroke:#bf360c,stroke-width:2px,color:#000;    
+    classDef graphextends fill:#ffeebb,stroke:#ab6600,stroke-width:2px,color:#000;
 ```
 
 ---
