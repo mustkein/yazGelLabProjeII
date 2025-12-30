@@ -290,12 +290,8 @@ Projenin hesaplama mantığının bulunduğu merkezdir. **Strateji Tasarım Dese
     * **Analiz:** `DegreeCentrality` (Popülerlik), `Coloring` (Graf Renklendirme), `ConnectedComponents` (Kopuk Parçalar).
 
 ```mermaid
----
-config:
-  theme: base
-  look: neo
----
 classDiagram
+    %% --- Sınıflar ---
     class Node:::graphextends {
         +int id
         +str name
@@ -336,6 +332,7 @@ classDiagram
     class DegreeCentrality:::extends { +execute() }
     class Coloring:::extends { +execute() }
     class ConnectedComponents:::extends { +execute() }
+    
     class TuristRehberiUygulamasi {
         +Tk root
         +Graph graph
@@ -345,6 +342,8 @@ classDiagram
         +run_algorithm()
         +draw_map()
     }
+
+    %% --- İlişkiler ---
     Graph "1" *-- "many" Node : Yönetir
     Graph "1" *-- "many" Edge : Yönetir
     Edge --> Node : Bağlar
@@ -361,10 +360,10 @@ classDiagram
     TuristRehberiUygulamasi --> Graph : Kullanır
     TuristRehberiUygulamasi ..> Algorithm : Çalıştırır
 
-    %% Define styles for Algorithm base, Graph base, their children
+    %% --- Renk Tanımları ---
     classDef algbase fill:#add8e6,stroke:#1a237e,stroke-width:2px;
     classDef extends fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px;
-    classDef graphbase fill:#ffd59a,stroke:#bf360c,stroke-width:2px;   
+    classDef graphbase fill:#ffd59a,stroke:#bf360c,stroke-width:2px;    
     classDef graphextends fill:#ffeebb,stroke:#ab6600,stroke-width:2px;
 ```
 
