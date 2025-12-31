@@ -77,28 +77,32 @@ Turistik mekanlar arasındaki erişilebilirlik analizinde ve başlangıç noktas
 ```mermaid
 
 graph TD
+  
+    classDef startEnd fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px,color:#1b5e20;
+    classDef process fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1;
+    classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#f57f17;
 
-    classDef baslangic fill:#d4edda,stroke:#28a745,stroke-width:2px;
-    classDef islem fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
-    classDef karar fill:#fff9c4,stroke:#fbc02d,stroke-width:2px;
+    A([Başlat]):::startEnd --> B[Kuyruğu ve Ziyaret<br/>Edilenleri Başlat]:::process
+    B --> C{Kuyruk Boş mu?}:::decision
+    
+    C -- Evet --> D([Boş Liste Döndür]):::startEnd
+    
+    C -- Hayır --> E[Kuyruğun Başından<br/>Eleman Çıkar]:::process
+    E --> F{Hedef Düğüm mü?}:::decision
+    
+    F -- Evet --> G[Ebeveyn Takibi ile<br/>Yolu Oluştur]:::process
+    G --> H([Yolu Döndür]):::startEnd
+    
+    F -- Hayır --> I[Komşuları ID'ye Göre Sırala]:::process
+    I --> J{Ziyaret Edilmemiş<br/>Komşu Var mı?}:::decision
+    
+    J -- Evet --> K[Ziyaret Edildi İşaretle,<br/>Ebeveyni Kaydet ve<br/>Kuyruğa Ekle]:::process
+    K --> J
+    
+    J -- Hayır --> C
 
-    Start([BAŞLAT]):::baslangic --> Hazirlik[Ziyaret Listesini ve <br/>Kuyruğu Hazırla]:::islem
-    Hazirlik --> Dongu{Kuyruk Boş mu?}:::karar
-    
-    Dongu -- Hayır --> Secim[Sıradaki Mekanı Kuyruktan Al]:::islem
-    Secim --> HedefKontrol{Hedef Mekan mı?}:::karar
-    
-    HedefKontrol -- Evet --> YolOlustur[Gidilen Rotayı <br/>Geriye Doğru Çıkar]:::islem
-    YolOlustur --> Bitis([ROTAYI DÖNDÜR]):::baslangic
-    
-    HedefKontrol -- Hayır --> Komsular[Komşu Mekanları Listele]:::islem
-    Komsular --> Ziyaret{Daha önce <br/>gidilmedi mi?}:::karar
-    
-    Ziyaret -- Evet --> Kaydet[Mekanı Kuyruğa Ekle ve <br/>Gelinen Yolu Not Et]:::islem
-    Kaydet --> Dongu
-    
-    Ziyaret -- Hayır --> Dongu
-    Dongu -- Evet --> YolYok([YOL BULUNAMADI]):::baslangic
+ 
+    linkStyle default stroke:#666,stroke-width:1px;
 
 ```
 
@@ -125,8 +129,46 @@ DFS algoritması, bir başlangıç düğümünden itibaren mümkün olduğunca d
 Turistik ağ içerisindeki döngüsel yolların tespiti ve ağın topolojik yapısının derinlemesine incelenmesi için kullanılmıştır.
 
 
-  <img width="2080" height="1299" alt="dfs" src="https://github.com/user-attachments/assets/2c82838d-2283-4fc6-9be8-f6948c9f235f" />
+```mermaid
+graph TD
+   
+    classDef startEnd fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px,color:#1b5e20;
+    classDef process fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#01579b;
+    classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#f57f17;
+    classDef error fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#b71c1c;
 
+    A([Başlat]):::startEnd --> B{Başlangıç ID<br/>Graf İçinde mi?}:::decision
+    B -- Hayır --> C([Boş Liste Döndür]):::error
+    B -- Evet --> D{Hedef ID<br/>Belirtilmiş mi?}:::decision
+
+    %% Sol Kol: Gezinme
+    D -- Hayır --> E[Stack'i Başlat ve<br/>Başlangıcı Ekle]:::process
+    E --> F{Stack Boş mu?}:::decision
+    F -- Evet --> G([Gezinme Sırasını Döndür]):::startEnd
+    F -- Hayır --> H[Stack'ten Son Elemanı Çıkar]:::process
+    H --> I{Daha Önce<br/>Ziyaret Edildi mi?}:::decision
+    I -- Evet --> F
+    I -- Hayır --> J[Ziyaret Edildi İşaretle ve<br/>Gezinme Listesine Ekle]:::process
+    J --> K[Komşuları ID'ye göre<br/>Ters Sırada Al]:::process
+    K --> L[Ziyaret Edilmeyen<br/>Komşuları Stack'e Ekle]:::process
+    L --> F
+
+    %% Sağ Kol: Arama
+    D -- Evet --> M[Stack ve Parent<br/>Sözlüğünü Başlat]:::process
+    M --> N{Stack Boş mu?}:::decision
+    N -- Evet --> O([Boş Liste Döndür]):::error
+    N -- Hayır --> P[Stack'ten Son Elemanı Çıkar]:::process
+    P --> Q{Mevcut == Hedef?}:::decision
+    Q -- Evet --> R[Parent Sözlüğü ile<br/>Yolu Geriye Doğru Oluştur]:::process
+    R --> S([Yolu Döndür]):::startEnd
+    Q -- Hayır --> T{Ziyaret Edildi mi?}:::decision
+    T -- Evet --> N
+    T -- Hayır --> U[Ziyaret Edildi İşaretle]:::process
+    U --> V[Komşuları ID'ye göre<br/>Ters Sırada Al]:::process
+    V --> W[Komşular için Parent<br/>Kaydet ve Stack'e Ekle]:::process
+    W --> N
+
+```
 
 #### Karmaşıklık Analizi
 
@@ -145,9 +187,61 @@ Dijkstra algoritması, ağırlıklı graflarda bir başlangıç düğümünden d
 
 Mekanlar arasındaki aktiflik, sosyal etkileşim ve bağlantı yoğunluğuna göre belirlenen Euclidean tabanlı ağırlık fonksiyonu kullanılarak en düşük maliyetli rotaların belirlenmesini sağlar.
 
+```mermaid
+
+graph TD
+    classDef startEnd fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px,color:#1b5e20;
+    classDef process fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#01579b;
+    classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#f57f17;
+    classDef error fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#b71c1c;
+
+    A([Başlat]):::startEnd --> B{Başlangıç ID<br/>Graf içinde mi?}:::decision
+    
+    B -- Hayır --> C([Boş Yol ve 0 döndür]):::error
+    
+    B -- Evet --> D[Mesafe Tablosunu -dist- Sonsuz Yap<br/>Önceki Düğüm Tablosunu -prev- Hazırla<br/>Başlangıç Mesafesini 0 Ayarla]:::process
+    
+    D --> E[Öncelik Kuyruğuna -pq-<br/>Başlangıç Düğümünü Ekle]:::process
+    
+    E --> F{Kuyruk -pq-<br/>Boş mu?}:::decision
+    
+    F -- Hayır --> G[Kuyruktan En Küçük<br/>Mesafeli Düğümü -curr- Çıkar]:::process
+    
+    G --> H{curr_dist ><br/>dist -curr-?}:::decision
+    
+    H -- Evet --> F
+    
+    H -- Hayır --> I{curr == target_id?}:::decision
+    
+    I -- Evet --> J[Döngüden Çık]:::process
+    
+    I -- Hayır --> K[Düğümün Komşularını Tara]:::process
+    
+    K --> L{Yeni Mesafe <<br/>dist -komşu-?}:::decision
+    
+    L -- Evet --> M[Mesafe Tablosunu Güncelle<br/>Önceki Düğümü Kaydet<br/>Kuyruğa -pq- Yeni Mesafeyi Ekle]:::process
+    
+    M --> K
+    
+    L -- Hayır --> K
+    
+    K -- Tüm komşular bitti --> F
+    
+    F -- Evet --> N{Hedef Mesafesi<br/>Sonsuz mu?}:::decision
+    
+    J --> N
+    
+    N -- Evet --> C
+    
+    N -- Hayır --> O[prev Tablosunu Takip Ederek<br/>En Kısa Rotayı Listele]:::process
+    
+    O --> P([ROTAYI VE TOPLAM<br/>MESAFEYİ DÖNDÜR]):::startEnd
+
+    linkStyle default stroke:#666,stroke-width:1px;
 
 
-<img width="2080" height="1299" alt="dijkstra" src="https://github.com/user-attachments/assets/b33cb648-d9cc-4a3c-9fb1-275fdf700ba5" />
+```
+
 
 #### Karmaşıklık Analizi
 
@@ -171,8 +265,31 @@ A* algoritması, Dijkstra algoritmasının geliştirilmiş versiyonudur. Dijkstr
 
 İstanbul haritası üzerinde coğrafi koordinatlar arası kuş uçuşu mesafeyi sezgisel veri olarak kullanarak, hedef odaklı ve yüksek performanslı rota planlaması yapar.
 
-<img width="2080" height="1299" alt="astar" src="https://github.com/user-attachments/assets/aee0cec4-3650-4fff-96a2-d87986e1be19" />
 
+```mermaid
+graph TD
+    classDef startEnd fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px,color:#1b5e20;
+    classDef process fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#01579b;
+    classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#f57f17;
+    classDef error fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#b71c1c;
+
+    A([Başlat]):::startEnd --> B{Mekanlar Kayıtlı mı?}:::decision
+    B -- Hayır --> C([İşlemi Durdur]):::error
+    B -- Evet --> D[Mesafe Tablolarını Hazırla<br/>Heuristic Fonksiyonu Tanımla]:::process
+    D --> E[Başlangıcı Ekle ve<br/>Tahmini Uzaklığı Hesapla]:::process
+    E --> F{İşlenecek Mekan<br/>Kaldı mı?}:::decision
+    F -- Hayır --> G([Yol Bulunamadı]):::error
+    F -- Evet --> H[Hedefe En Yakın<br/>Mekanı Seç]:::process
+    H --> I{Seçilen Mekan<br/>Hedef mi?}:::decision
+    I -- Evet --> J[Yolu Geriye Doğru Çıkar]:::process
+    J --> K([Sonucu Döndür]):::startEnd
+    I -- Hayır --> L[Bağlı Mekanları İncele]:::process
+    L --> M[Yeni G Skorunu Hesapla]:::process
+    M --> N{Yeni Yol<br/>Daha mı Kısa?}:::decision
+    N -- Evet --> O[Bilgileri Güncelle ve<br/>Kuyruğa Ekle]:::process
+    O --> F
+    N -- Hayır --> F
+```
 
 #### Karmaşıklık Analizi
 
@@ -192,7 +309,35 @@ A* algoritması, Dijkstra algoritmasının geliştirilmiş versiyonudur. Dijkstr
 
 Floyd-Warshall algoritması, tüm düğüm çiftleri arasındaki en kısa yolları bulur. Dinamik programlama yaklaşımı kullanarak her adımda ara düğümler üzerinden geçen yolları değerlendirir.  Negatif ağırlıklı kenarları destekler ancak negatif döngü içermemelidir. Ağların genel geçiş kapasitesini ölçmede ve küçük-orta ölçekli çizgelerde tüm çiftler arası analizler için kullanılmaktadır.
 
-<img width="2080" height="1299" alt="floyd-warshall" src="https://github.com/user-attachments/assets/7a240b48-d54d-4f0a-9f99-4586cba521b7" />
+```mermaid
+graph TD
+
+    classDef startEnd fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px,color:#1b5e20;
+    classDef process fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#01579b;
+    classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#f57f17;
+
+    A([BAŞLAT]):::startEnd --> B[Tüm Mekanlar Arası Mesafe<br/>Tablosunu Hazırla<br/>Bilinen Yolları ve<br/>Mesafeleri Tabloya İşle]:::process
+    B --> C[Henüz Bilinmeyen Tüm<br/>Yolları<br/>'Sonsuz Uzaklık' Olarak<br/>İşaretle]:::process
+    C --> D[Sırayla Her Bir Mekanı<br/>'ARA DURAK' Olarak Seç]:::process
+    
+    D -- Tüm Mekanlar Ara Durak<br/>Oldu --> E{Belirli Bir Rota<br/>İsteniyor mu?}:::decision
+    E -- Hayır --> F([İşlemi Sonlandır]):::startEnd
+    E -- Evet --> G[Tablodaki Güncel Verileri<br/>Kullanarak<br/>Adım Adım En Kısa Rotayı<br/>Çıkar]:::process
+    G --> H([EN KISA ROTAYI VE<br/>TOPLAM MESAFEYİ DÖNDÜR]):::startEnd
+
+    D -- " " --> I[Sırayla Bir 'BAŞLANGIÇ'<br/>Mekanı Seç]:::process
+    I -- Tüm Başlangıçlar Bitti --> D
+    I -- " " --> J[Sırayla Bir 'HEDEF' Mekanı<br/>Seç]:::process
+    J -- Tüm Hedefler Bitti --> I
+
+    J -- " " --> K{Başlangıçtan Hedefe<br/>Giderken<br/>Seçilen 'ARA DURAK'tan<br/>Geçmek<br/>Yolu Kısaltıyor mu?}:::decision
+    K -- Hayır --> J
+    K -- Evet --> L[Tablodaki Eski Mesafeyi Sil<br/>Yeni ve Kısa Olan Mesafeyi<br/>Yaz]:::process
+    L -- " " --> J
+
+    linkStyle default stroke:#666,stroke-width:1px;
+
+```
 
 #### Karmaşıklık Analizi
 
@@ -250,11 +395,13 @@ Aşağıda, sistemin modüler yapısı ve çalışma zamanı davranışları, pr
 
 ## 1. Yazılım Mimarisi ve Sınıf Yapısı
 
-Sistem dört ana modülden oluşmaktadır. Her modül belirli bir sorumluluk alanını üstlenir.
+Sistem dört ana modülden oluşmaktadır:
 
 ### A. Kullanıcı Arayüzü Katmanı (UI Layer)
 
 Kullanıcının sistemle etkileşime girdiği ön yüz katmanıdır.
+<img width="1920" height="1040" alt="image" src="https://github.com/user-attachments/assets/ede00e15-b6cc-4c8d-bcce-6883f2e0cebb" />
+
 
 * **Sınıf:** `TuristRehberiUygulamasi`
 * **Görevi:**
@@ -357,8 +504,6 @@ classDiagram
     TuristRehberiUygulamasi --> Graph : Kullanır
     TuristRehberiUygulamasi ..> Algorithm : Çalıştırır
 
-    %% --- Renk Tanımları (DÜZELTİLDİ: color:#000 eklendi) ---
-    %% Her satırın sonuna color:#000 (Siyah Yazı) ekledim.
     classDef algbase fill:#add8e6,stroke:#1a237e,stroke-width:2px,color:#000;
     classDef extends fill:#a5d6a7,stroke:#2e7d32,stroke-width:2px,color:#000;
     classDef graphbase fill:#ffd59a,stroke:#bf360c,stroke-width:2px,color:#000;    
@@ -371,7 +516,7 @@ classDiagram
 
 Sistemenin çalışma zamanındaki davranışı üç ana fazdan oluşur.
 
-### Faz 1: Başlatma (Initialization)
+### Faz 1: Başlatma
 Program `main.py` üzerinden tetiklendiğinde sırasıyla şu işlemler gerçekleşir:
 1.  **Arayüz Yüklemesi:** `TuristRehberiUygulamasi` sınıfı başlatılır.
 2.  **Veri Entegrasyonu:** Sistem varsayılan olarak `mekanlar.csv` dosyasını okur. `Graph` sınıfı bu ham veriyi işleyerek bellekte nesnelere dönüştürür.
@@ -396,21 +541,20 @@ Algoritma çalıştıktan sonra sonuçlar değerlendirilir:
 
 ```mermaid
 graph TD
-    %% --- GÖRSELDEN ALINAN RENK PALETİ ---
-    
-    %% UI (Sarı/Krem) - Arayüz ve Kullanıcı Etkileşimi
+      
+    %% UI- Arayüz ve Kullanıcı Etkileşimi
     classDef uiStyle fill:#FFF2CC,stroke:#D6B656,stroke-width:2px,color:#000;
     
-    %% DATA (Turuncu/Toprak) - Veri ve Graph Yönetimi
+    %% DATA  - Veri ve Graph Yönetimi
     classDef dataStyle fill:#F4B084,stroke:#B95000,stroke-width:2px,color:#000;
     
-    %% LOGIC (Mavi) - Karar Mekanizmaları ve Girdiler
+    %% LOGIC - Karar Mekanizmaları ve Girdiler
     classDef logicStyle fill:#DAE8FC,stroke:#6C8EBF,stroke-width:2px,color:#000;
     
-    %% ALGO (Yeşil) - Algoritma İşleme
+    %% ALGO  - Algoritma İşleme
     classDef algoStyle fill:#D5E8D4,stroke:#82B366,stroke-width:2px,color:#000;
 
-    %% ERROR (Açık Kırmızı) - Hata Durumları
+    %% ERROR
     classDef errorStyle fill:#F8CECC,stroke:#B85450,stroke-width:2px,color:#000;
 
     %% ---------------------------------------------------
