@@ -133,4 +133,182 @@ class TuristRehberiUygulamasi:
             self.btn_toggle.config(text="[-] Daralt")
             self.matrix_visible = True
 
-    
+def update_matrix_view(self):
+        if not hasattr(self.graph, 'get_adjacency_matrix_data'): return
+        ids, matrix = self.graph.get_adjacency_matrix_data()
+        self.txt_matrix.delete("1.0", tk.END)
+        header = "    " + " ".join([f"{str(i):>3}" for i in ids]) + "\n"
+        self.txt_matrix.insert(tk.END, header)
+        self.txt_matrix.insert(tk.END, "-" * len(header) + "\n")
+        for i, row_id in enumerate(ids):
+            row_str = f"{str(row_id):<3}|" + " ".join([f"{str(x):>3}" for x in matrix[i]]) + "\n"
+            self.txt_matrix.insert(tk.END, row_str)
+
+    def draw_map(self, highlight_path=None, color_map=None):
+        self.canvas.delete("all")
+        drawn_edges = set()
+        for node in self.graph.get_nodes():
+            for edge in self.graph.get_neighbors(node.id):
+                pair = tuple(sorted((node.id, edge.target.id)))
+                if pair not in drawn_edges:
+                    color, width = "#cccccc", 1
+                    if highlight_path and node.id in highlight_path and edge.target.id in highlight_path:
+                        idx1, idx2 = highlight_path.index(node.id), highlight_path.index(edge.target.id)
+                        if abs(idx1 - idx2) == 1: color = "red"; width = 3
+                    self.canvas.create_line(node.x, node.y, edge.target.x, edge.target.y, fill=color, width=width)
+                    mx, my = (node.x + edge.target.x)/2, (node.y + edge.target.y)/2
+                    self.canvas.create_text(mx, my, text=f"{int(edge.weight)}", fill="blue", font=("Arial", 7))
+                    drawn_edges.add(pair)
+
+        palette = ["#FFADAD", "#9BF6FF", "#CAFFBF", "#FDFFB6", "#FFD6A5", "#99FFFF", "#E0E0E0"]
+        for node in self.graph.get_nodes():
+            fill_color = palette[(color_map[node.id] - 1) % len(palette)] if color_map and node.id in color_map else "orange"
+            if highlight_path and node.id in highlight_path: fill_color = "#32CD32"
+            self.canvas.create_oval(node.x-12, node.y-12, node.x+12, node.y+12, fill=fill_color, outline="black")
+            self.canvas.create_text(node.x, node.y, text=str(node.id), font=("Arial", 8, "bold"))
+            self.canvas.create_text(node.x, node.y+22, text=node.name, font=("Arial", 7, "bold"))
+
+    def run_algorithm(self):
+        algo = self.algo_var.get()
+        try:
+            sid = int(self.ent_start.get()) if self.ent_start.get() else None
+            tid = int(self.ent_end.get()) if self.ent_end.get() else None
+        except: return
+        
+        for item in self.tree.get_children(): self.tree.delete(item)
+        
+        start_time = time.perf_counter()
+        result, color_map = None, None
+        
+        try:
+            if algo == "BFS":
+                result = BFS().execute(self.graph, sid, tid)
+                for idx, nid in enumerate(result, 1):
+                    self.tree.insert("", tk.END, values=(f"Sıra {idx}", self.graph.nodes[nid].name, f"ID: {nid}"))
+            
+            elif algo == "DFS":
+                result = DFS().execute(self.graph, sid, tid)
+                if not result:
+                    messagebox.showinfo("Bilgi", "Yol bulunamadı veya gezilemedi.")
+                else:
+                    header = "ROTA (DFS)" if tid else "GEZİNME (DFS)"
+                    if tid: 
+                        path_names = " -> ".join([self.graph.nodes[n].name for n in result])
+                        self.tree.insert("", tk.END, values=(header, path_names, f"Adım: {len(result)}"))
+                    else:
+                        for idx, nid in enumerate(result, 1):
+                            self.tree.insert("", tk.END, values=(f"Sıra {idx}", self.graph.nodes[nid].name, f"ID: {nid}"))
+            
+            elif algo == "Dijkstra":
+                result, cost = Dijkstra().execute(self.graph, sid, tid)
+                if result:
+                    path_names = " -> ".join([self.graph.nodes[n].name for n in result])
+                    self.tree.insert("", tk.END, values=("ROTA (Dijkstra)", path_names, f"Maliyet: {cost:.2f}"))
+
+            elif algo == "A*":
+                result, cost = AStar().execute(self.graph, sid, tid)
+                if result:
+                    path_names = " -> ".join([self.graph.nodes[n].name for n in result])
+                    self.tree.insert("", tk.END, values=("ROTA (A*)", path_names, f"Maliyet: {cost:.2f}"))
+            
+            elif algo == "Floyd-Warshall":
+                result, cost = FloydWarshall().execute(self.graph, sid, tid)
+                if result:
+                    path_names = " -> ".join([self.graph.nodes[n].name for n in result])
+                    self.tree.insert("", tk.END, values=("ROTA (Floyd-W)", path_names, f"Maliyet: {cost:.2f}"))
+            
+            elif algo == "Degree Centrality":
+                res = DegreeCentrality().execute(self.graph)
+                self.tree.insert("", tk.END, values=("SONUÇ", "En Popüler 5 Mekan", ""))
+                for idx, (nid, name, count) in enumerate(res, 1):
+                    self.tree.insert("", tk.END, values=(f"Top {idx}", name, f"Bağlantı Sayısı: {count}"))
+            
+            elif algo == "Coloring":
+                color_map = Coloring().execute(self.graph)
+                for nid in sorted(color_map.keys()):
+                    self.tree.insert("", tk.END, values=(f"ID: {nid}", self.graph.nodes[nid].name, f"Renk Grubu: {color_map[nid]}"))
+            
+            elif algo == "Connected Components":
+                comps = ConnectedComponents().execute(self.graph)
+                self.tree.insert("", tk.END, values=("SONUÇ", f"{len(comps)} Ayrık Topluluk Bulundu", ""))
+                for i, comp in enumerate(comps, 1):
+                    self.tree.insert("", tk.END, values=(f"Topluluk {i}", f"{len(comp)} Mekan Var", "-"*10))
+                    for nid in comp:
+                        node_name = self.graph.nodes[nid].name
+                        self.tree.insert("", tk.END, values=("", node_name, f"ID: {nid}"))
+
+            self.lbl_perf.config(text=f"Süre: {(time.perf_counter() - start_time)*1000:.4f} ms")
+            self.draw_map(highlight_path=result if isinstance(result, list) else None, color_map=color_map)
+        
+        except Exception as e: messagebox.showerror("Hata", str(e))
+
+    def on_click_node(self, event):
+        for node in self.graph.get_nodes():
+            distance = ((node.x - event.x)**2 + (node.y - event.y)**2)**0.5
+            if distance <= 15:
+                neighbors = [str(e.target.id) for e in self.graph.get_neighbors(node.id)]
+                info = (
+                    f"  MEKAN BİLGİLERİ  \n"
+                    f"ID: {node.id}\n"
+                    f"Ad: {node.name}\n"
+                    f"Koordinat: ({node.x}, {node.y})\n\n"
+                    f" ~ ANALİZ SKORLARI\n"
+                    f"Aktiflik Skoru: {node.active_score}\n"
+                    f"Sosyal Skor: {node.social_score}\n"
+                    f"Bağlantı Sayısı: {node.connection_count}\n\n"
+                    f" ~ KOMŞULUKLAR\n"
+                    f"Bağlı Mekanlar (ID): {', '.join(neighbors) if neighbors else 'Yok'}"
+                )
+                messagebox.showinfo(f"Mekan Detayı: {node.name}", info)
+                self.ent_id.delete(0, tk.END); self.ent_id.insert(0, str(node.id))
+                self.ent_name.delete(0, tk.END); self.ent_name.insert(0, node.name)
+                break
+
+    def save_json(self):
+        file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files", "*.json")])
+        if file_path and self.graph.save_to_json_path(file_path):
+            messagebox.showinfo("Başarılı", "Düğüm yapısı indirildi.")
+
+    def load_json(self):
+        file_path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
+        if file_path:
+            self.graph.load_from_json(file_path)
+            self.draw_map(); self.update_matrix_view(); messagebox.showinfo("Başarılı", "Yüklendi.")
+
+    def add_node_ui(self):
+        try:
+            new_id_str = self.ent_id.get().strip()
+            new_name = self.ent_name.get().strip()
+            if not new_id_str or not new_name: messagebox.showwarning("Eksik Bilgi", "Lütfen ID ve Ad alanlarını doldurun."); return
+            new_id = int(new_id_str)
+            if new_id in self.graph.nodes: messagebox.showerror("Hata", f"ID {new_id} zaten mevcut!"); return
+            current_names = [n.name.lower() for n in self.graph.get_nodes()]
+            if new_name.lower() in current_names: messagebox.showerror("Hata", f"'{new_name}' isimli bir mekan zaten kayıtlı!"); return
+            
+            x, y = random.randint(100, 1100), random.randint(100, 550)
+            new_node = Node(node_id=new_id, name=new_name, x=x, y=y, active_score=0.5, social_score=500, connection_count=0)
+            self.graph.add_node(new_node)
+            self.draw_map(); self.update_matrix_view()
+            messagebox.showinfo("Başarılı", f"'{new_name}' eklendi."); self.ent_id.delete(0, tk.END); self.ent_name.delete(0, tk.END)
+        except ValueError: messagebox.showerror("Geçersiz Giriş", "ID tam sayı olmalı!")
+
+    def update_node_ui(self):
+        try:
+            if self.graph.update_node(int(self.ent_id.get()), self.ent_name.get()):
+                self.draw_map(); self.update_matrix_view(); messagebox.showinfo("Başarılı", "Güncellendi.")
+        except: pass
+
+    def delete_node_ui(self):
+        try:
+            if self.graph.remove_node(int(self.ent_id.get())):
+                self.draw_map(); self.update_matrix_view(); messagebox.showinfo("Başarılı", "Silindi.")
+        except: pass
+
+    def add_edge_ui(self):
+        try:
+            self.graph.add_edge(int(self.ent_src.get()), int(self.ent_dst.get()))
+            self.draw_map(); self.update_matrix_view()
+        except: pass
+
+    def export_matrix(self): self.graph.export_adjacency_matrix(); messagebox.showinfo("Bilgi", "Matris dosyaya çıkarıldı.")
+    def save_csv(self): self.graph.save_to_csv(); messagebox.showinfo("Bilgi", "CSV Kaydedildi.")
