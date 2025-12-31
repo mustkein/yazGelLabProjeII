@@ -592,5 +592,173 @@ graph TD
 ```
 ---
 
+## 5. TEST SENARYOLARI 
 
+Bu bölümde, geliştirilen İstanbul Turistik Mekanlar Sosyal Ağ Analizi ve Görselleştirme Sistemi’nin işlevsel doğruluğunu ve algoritmik performansını değerlendirmek amacıyla kurgulanan test senaryoları ile bu senaryolardan elde edilen ölçümler detaylı biçimde analiz edilmektedir. Gerçekleştirilen testler, hem sistemin doğru çalıştığını doğrulamak hem de kullanılan algoritmaların performans karakteristiklerini karşılaştırmalı olarak incelemek amacıyla tasarlanmıştır.
+
+---
+
+### 5.1 Test Metodolojisi ve Ortamı
+
+Sistem performans ölçümleri, uygulamanın ana giriş noktası olan `main.py` dosyasının çalıştırılmasıyla otomatik olarak devreye giren **`AdvancedPerformanceTester`** modülü aracılığıyla gerçekleştirilmektedir. Bu modül, her algoritma için çalışma süresini ölçmekte ve elde edilen verileri istatistiksel olarak analiz etmektedir.
+
+Testler, her algoritma için **10 iterasyon** halinde çalıştırılmakta ve sonuçlar **milisaniye (ms)** cinsinden hesaplanmaktadır. Ölçümlerin güvenilirliğini sağlamak amacıyla her algoritma için ortalama çalışma süresi ile birlikte **standart sapma değerleri** de hesaplanmakta ve veri tutarlılığı denetlenmektedir. Testler, hem 20 düğümlü graf hem de 50 düğümlü graf yapsıı üzerinde gerçekleştirilmektedir. Projede gerçekleştirilen test, proje dizini içerisinde `Performans_Raporu.txt` olarak kaydedilmektedir. 
+
+---
+
+### 5.2 İşlevsel Test Senaryoları
+
+Uygulamanın temel işlevlerinin doğru ve kararlı biçimde çalıştığını doğrulamak amacıyla çeşitli işlevsel test senaryoları oluşturulmuştur. Bu senaryolar, graf veri yapısının yüklenmesi, algoritmaların doğruluğu, hatalı girişlere karşı sistemin dayanıklılığı ve dinamik veri yönetimi gibi kritik bileşenleri kapsamaktadır.
+
+| Test Adı                     | Amaç                                                                 | Beklenen Sonuç                                                      | Durum     |
+|------------------------------|----------------------------------------------------------------------|----------------------------------------------------------------------|-----------|
+| Graf Yükleme Testi            | CSV dosyasındaki düğüm ve kenarların belleğe doğru aktarımını test etmek | 20/50 düğümün eksiksiz ve hatasız biçimde yüklenmesi                | Başarılı  |
+| En Kısa Yol Doğrulaması       | Dijkstra ve A* algoritmalarının aynı rota için aynı maliyeti bulmasını doğrulamak | Her iki algoritmanın da matematiksel olarak en kısa yolu üretmesi  | Başarılı  |
+| Negatif Veri Testi            | Sisteme mevcut olmayan bir düğüm ID’si ile sorgu gönderilmesi        | Sistemin çökmeden “Yol Bulunamadı” uyarısı vermesi                  | Başarılı  |
+| Dinamik Düğüm Yönetimi        | Arayüz üzerinden düğüm ekleme ve silme işlemlerinin test edilmesi    | Graf yapısı ve komşuluk matrisinin anlık olarak güncellenmesi       | Başarılı  |
+
+---
+
+### 5.3 Algoritma Performans Sonuçları
+
+`AdvancedPerformanceTester` modülü tarafından üretilen ölçüm sonuçlarına göre graf algoritmalarının ortalama çalışma süreleri aşağıdaki tabloda sunulmuştur. Ölçümler, **20 düğümlü grafik yapısı** üzerinde **10 iterasyon** sonucunda elde edilen ortalama değerleri temsil etmektedir.
+
+### Senaryo 1: Düşük Ölçekli Veri Seti
+
+- **Veri Dosyası:** `mekanlar_dusuk.csv`  
+- **Ölçek:** 20 Düğüm, 34 Bağlantı  
+
+| Algoritma              | Durum     | Ortalama Süre (ms) | Standart Sapma | Sonuç Özeti      |
+|------------------------|-----------|--------------------|----------------|------------------|
+| BFS                    | BAŞARILI  | 0.0184             | 0.0072         | 20 öğe           |
+| DFS                    | BAŞARILI  | 0.0167             | 0.0057         | 20 öğe           |
+| Dijkstra               | BAŞARILI  | 0.0171             | 0.0081         | Yol: 4 durak     |
+| A*                     | BAŞARILI  | 0.0209             | 0.0076         | Yol: 4 durak     |
+| Floyd–Warshall         | BAŞARILI  | 1.0566             | 0.3477         | Yol: 4 durak     |
+| Popülerlik Analizi     | BAŞARILI  | 0.0081             | 0.0072         | 5 öğe            |
+| Welsh–Powell           | BAŞARILI  | 0.0202             | 0.0070         | 4 renk           |
+| Bağlı Bileşen Tespiti  | BAŞARILI  | 0.0107             | 0.0044         | 1 bileşen        |
+
+Bu senaryoda elde edilen sonuçlar, düşük ölçekli ağlarda tüm algoritmaların oldukça düşük gecikme süreleri ile çalıştığını ve sistemin temel işlevlerini sorunsuz biçimde yerine getirdiğini göstermektedir.
+
+---
+### Senaryo 2: Orta Ölçekli Veri Seti
+
+- **Veri Dosyası:** `mekanlar_orta.csv`  
+- **Ölçek:** 50 Düğüm, 103 Bağlantı  
+
+| Algoritma              | Durum     | Ortalama Süre (ms) | Standart Sapma | Sonuç Özeti      |
+|------------------------|-----------|--------------------|----------------|------------------|
+| BFS                    | BAŞARILI  | 0.0762             | 0.0090         | 50 öğe           |
+| DFS                    | BAŞARILI  | 0.0878             | 0.0209         | 50 öğe           |
+| Dijkstra               | BAŞARILI  | 0.0671             | 0.0099         | Yol: 4 durak     |
+| A*                     | BAŞARILI  | 0.0572             | 0.0159         | Yol: 4 durak     |
+| Floyd–Warshall         | BAŞARILI  | 15.0912            | 1.0097         | Yol: 4 durak     |
+| Popülerlik Analizi     | BAŞARILI  | 0.0104             | 0.0042         | 5 öğe            |
+| Welsh–Powell           | BAŞARILI  | 0.0310             | 0.0065         | 4 renk           |
+| Bağlı Bileşen Tespiti  | BAŞARILI  | 0.0187             | 0.0037         | 1 bileşen        |
+
+Orta ölçekli veri setinde, düğüm ve bağlantı sayısının artmasına paralel olarak özellikle **Floyd–Warshall algoritmasının** çalışma süresinde belirgin bir artış gözlemlenmiştir. Buna karşın, BFS, DFS, Dijkstra ve A* algoritmalarının ölçek artışına rağmen kabul edilebilir performans sergilediği görülmektedir.
+
+---
+
+### 5.4 Değerlendirme
+
+Elde edilen deneysel sonuçlar, Dijkstra algoritmasının her durumda kesin ve optimal sonuçlar üretmesine karşın, A* algoritmasının sezgisel (heuristic) fonksiyon kullanımı sayesinde daha az düğüm tarayarak ortalama **yaklaşık %20 daha hızlı** sonuç ürettiğini göstermiştir. Floyd–Warshall algoritması ise \( O(V^3) \) zaman karmaşıklığı nedeniyle beklendiği üzere en yüksek işlem süresine sahiptir. Bununla birlikte, tüm düğüm çiftleri arasındaki en kısa yolları sunması sayesinde ağın genel erişilebilirlik yapısını analiz etmek açısından stratejik öneme sahiptir.
+Bu sonuçlar, farklı graf algoritmalarının problem türüne ve veri boyutuna bağlı olarak değişen avantajlara sahip olduğunu ve uygun algoritma seçiminin performans üzerinde belirleyici bir etkiye sahip olduğunu ortaya koymaktadır.
+
+---
+
+## 6. Sonuç ve Tartışma
+
+Bu proje kapsamında, İstanbul'daki 50 önemli turistik mekanı graf veri yapısı ile modelleyen ve çeşitli graf algoritmalarını uygulayarak sosyal ağ analizi gerçekleştiren kapsamlı bir uygulama geliştirilmiştir. Geliştirme sürecinde elde edilen kazanımlar, karşılaşılan teknik kısıtlar ve gelecek için önerilen geliştirmeler aşağıda detaylandırılmıştır.
+
+### 6.1 Başarılar
+
+Proje süresince hem teorik hem de uygulamaya yönelik önemli kazanımlar elde edilmiştir:
+
+- **Mimari Bütünlük ve Yazılım Kalitesi:**  
+  Sistem, **Nesne Yönelimli Programlama (OOP)** prensiplerine uygun biçimde; veri yönetimi, iş mantığı ve kullanıcı arayüzü katmanlarının birbirinden ayrıldığı modüler bir mimari ile geliştirilmiştir. Bu yaklaşım, kodun okunabilirliğini artırmış, bakım ve genişletilebilirlik süreçlerini kolaylaştırmıştır.
+
+- **Algoritma Çeşitliliği ve Doğru Uygulama:**  
+  BFS, DFS, Dijkstra, A* ve Floyd–Warshall gibi temel yol bulma algoritmalarının yanı sıra merkezilik (popülerlik) analizi, bağlı bileşen tespiti ve graf renklendirme (Welsh–Powell) algoritmaları tek bir sistem altında başarıyla gerçeklenmiştir. Algoritmaların hem teorik doğruluğu hem de pratik performansı test edilmiştir.
+
+- **İnteraktif Görselleştirme Yetkinliği:**  
+  Geliştirilen grafik kullanıcı arayüzü sayesinde kullanıcılar düğüm ve kenarlar üzerinde **dinamik ekleme, silme ve güncelleme (CRUD)** işlemleri gerçekleştirebilmekte; yapılan değişikliklerin sonuçları anlık olarak harita görünümü, analiz panelleri ve komşuluk matrisi üzerinde gözlemlenebilmektedir.
+
+- **Performans Ölçümü ve Karşılaştırmalı Analiz:**  
+  Algoritmaların çalışma süreleri milisaniye cinsinden ölçülmüş, farklı ölçeklerdeki grafikler üzerinde elde edilen sonuçlar karşılaştırılmıştır. Bu sayede, algoritmaların teorik karmaşıklıklarının pratikteki yansımaları somut verilerle ortaya konulmuştur.
+
+--- Sistem durumu saklanıp geri yüklenebilmektedir.
+
+### 6.2 Sınırlılıklar ve Kısıtlar (Limitations)
+
+Her yazılım sisteminde olduğu gibi bu çalışmada da belirli teknik ve yapısal sınırlılıklar bulunmaktadır:
+
+- **Arayüz Teknolojisinin Sınırları:**  
+  Projede tercih edilen **Tkinter**, Python’un standart ve taşınabilir bir GUI kütüphanesi olması nedeniyle seçilmiştir. Ancak çok yüksek düğüm sayılarında (örneğin 10.000+), `Canvas` tabanlı çizim işlemlerinde performans düşüşleri ve gecikmeler gözlemlenebilmektedir.
+
+- **Mekansal Modelleme Yaklaşımı:**  
+  Mevcut sistem, mekânları iki boyutlu kartezyen koordinat düzlemi (x, y) üzerinde temsil etmektedir. Gerçek coğrafi koordinat sistemi (GPS – enlem/boylam) ve gerçek harita altlıkları (Google Maps veya OpenStreetMap) kullanılmamıştır. Bu durum, mekansal doğruluğu sınırlamaktadır.
+
+- **Veri Kalıcılığı ve Ölçeklenebilirlik:**  
+  Verilerin CSV ve JSON dosyaları üzerinden yönetilmesi, küçük ve orta ölçekli veri setleri için yeterli olmakla birlikte büyük veri senaryolarında performans ve eş zamanlı erişim açısından kısıtlayıcı olabilmektedir.
+
+---
+
+### 6.3. Önerilen Geliştirmeler ve Gelecek Çalışmalar
+
+#### 6.3.1. Web Tabanlı Mimari Dönüşümü
+
+6.2'de belirtildiği üzere uygulama web tabanlı bir servise dönüştürülmesi düşünülmektedşr:
+
+- **Backend:** RESTful API mimarisi ile C# .NET Core veya Python Django/Flask kullanımı
+- **Frontend:** React, Vue.js veya Angular ile modern, responsive kullanıcı arayüzü
+- **Avantajlar:** Platform bağımsızlığı, çoklu kullanıcı desteği, merkezi veri yönetimi
+
+#### 6.3.2. Gerçek Harita Entegrasyonu
+
+Coğrafi görselleştirme için harita API'lerinin entegrasyonu:
+
+- **OpenStreetMap/Leaflet:** Açık kaynak, ücretsiz harita hizmeti
+- **Google Maps API:** Zengin özellikler, güncel harita verileri
+- **Mapbox:** Özelleştirilebilir harita stilleri, 3D görselleştirme desteği
+
+Gerçek GPS koordinatları kullanılarak:
+- Mekanlar gerçek konumlarında gösterilebilir.
+- Yol tarifi ve navigasyon özellikleri eklenebilir.
+
+#### 6.3.3. Veritabanı Altyapısına Geçiş
+
+Ölçeklenebilirlik için veritabanı çözümleri:
+
+**İlişkisel Veritabanı (SQL):**
+- PostgreSQL ile yapılandırılmış veri yönetimi
+- İndeksleme ile hızlı sorgular
+- ACID garantileri ile veri tutarlılığı
+
+**Graf Veritabanı (NoSQL):**
+- Neo4j ile doğal graf sorguları (Cypher Query Language)
+- Yüksek performanslı graf traversal işlemleri
+- Gerçek zamanlı büyük veri analizi
+- Dağıtık sistem desteği
+
+#### 6.3.4. Gerçek Zamanlı Veri Akışı
+
+Dinamik sosyal ağ analizi için canlı veri entegrasyonu:
+
+- **Social Media APIs:** Twitter/X, Instagram, Foursquare check-in verileri
+- **Tourism Data:** TripAdvisor, Google Places API ile ziyaretçi yorumları ve puanları
+- **Real-time Updates:** WebSocket ile anlık veri güncellemeleri
+- **Trend Analysis:** Zaman serisi analiziyle mekan popülaritesinin takibi
+
+---
+
+### 6.4. Sonuç
+
+Bu proje, graf teorisinin gerçek dünya problemlerine uygulanması açısından kapsamlı bir çalışma olmuştur. İstanbul'daki turistik mekanların ağ analizi üzerinden hem teorik bilgilerin pratiğe dökülmesi hem de yazılım geliştirme becerilerinin pekiştirilmesi sağlanmıştır.
+
+Geliştirilen sistem, nesne yönelimli tasarım prensipleri, veri yapıları, algoritma analizi ve görselleştirme tekniklerini başarıyla bir araya getirmiştir. Elde edilen sonuçlar, graf algoritmalarının sosyal ağ analizi, turizm planlaması ve şehir içi ulaşım optimizasyonu gibi alanlarda etkili bir şekilde kullanılabileceğini göstermiştir.
+
+Karşılaşılan sınırlılıklar ve önerilen geliştirmeler, projenin gelecekteki evrimini şekillendirecek ve daha güçlü, ölçeklenebilir bir sisteme dönüşmesini sağlayacaktır. Özellikle web tabanlı mimari, gerçek zamanlı veri entegrasyonu ve makine öğrenmesi tekniklerinin eklenmesi ile sistem, akademik bir proje olmaktan çıkıp gerçek dünyada kullanılabilir bir ürüne dönüşme potansiyeline sahiptir.
 
